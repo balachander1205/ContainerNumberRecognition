@@ -11,6 +11,11 @@ import imutils
 import time
 import cv2
 
+def bounding_box(points):
+	x_coordinates, y_coordinates = zip(*points)
+	return [(min(x_coordinates), min(y_coordinates)), (max(x_coordinates), max(y_coordinates))]
+
+
 def decode_predictions(scores, geometry):
 	# grab the number of rows and columns from the scores volume, then
 	# initialize our set of bounding box rectangles and corresponding
@@ -100,7 +105,7 @@ print("[INFO] loading EAST text detector...")
 net = cv2.dnn.readNet(args["east"])
 
 # if a video path was not supplied, grab the reference to the web cam
-vs = cv2.VideoCapture('images/container-croped.mp4')
+vs = cv2.VideoCapture('container-croped.mp4')
 
 # start the FPS throughput estimator
 fps = FPS().start()
@@ -134,6 +139,7 @@ while True:
 	# of the model to obtain the two output layer sets
 	blob = cv2.dnn.blobFromImage(frame, 1.0, (newW, newH),
 		(123.68, 116.78, 103.94), swapRB=True, crop=False)
+	# print(blob)
 	net.setInput(blob)
 	(scores, geometry) = net.forward(layerNames)
 
@@ -142,6 +148,7 @@ while True:
 	(rects, confidences) = decode_predictions(scores, geometry)
 	boxes = non_max_suppression(np.array(rects), probs=confidences)
 
+	boundBoxes = []
 	# loop over the bounding boxes
 	for (startX, startY, endX, endY) in boxes:
 		# scale the bounding box coordinates based on the respective
@@ -151,8 +158,18 @@ while True:
 		endX = int(endX * rW)
 		endY = int(endY * rH)
 
+		boundBoxes.append([startX+10, startY+10, endX+10, endY+10])
 		# draw the bounding box on the frame
-		cv2.rectangle(orig, (startX+5, startY+5), (endX+5, endY+5), (0, 255, 255), 1)
+		# cv2.rectangle(orig, (startX+5, startY+5), (endX+5, endY+5), (0, 255, 255), 1)
+
+	if len(boundBoxes) > 0 :		
+		boundBoxes = np.asarray(boundBoxes)
+		left = np.min(boundBoxes[:,0])
+		top = np.min(boundBoxes[:,1])
+		right = np.max(boundBoxes[:,2])
+		bottom = np.max(boundBoxes[:,3])
+		cv2.rectangle(orig, (left,top), (right,bottom), (255, 0, 0), 2)
+
 
 	# update the FPS counter
 	fps.update()
