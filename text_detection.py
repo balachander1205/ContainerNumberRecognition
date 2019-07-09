@@ -116,6 +116,7 @@ for y in range(0, numRows):
 # boxes
 boxes = non_max_suppression(np.array(rects), probs=confidences)
 
+boundBoxes = []
 # loop over the bounding boxes
 for (startX, startY, endX, endY) in boxes:
 	# scale the bounding box coordinates based on the respective
@@ -124,9 +125,16 @@ for (startX, startY, endX, endY) in boxes:
 	startY = int(startY * rH)
 	endX = int(endX * rW)
 	endY = int(endY * rH)
-
+	boundBoxes.append([startX-20, startY-20, endX+20, endY+20])
 	# draw the bounding box on the image
-	cv2.rectangle(orig, (startX, startY), (endX, endY), (0, 255, 0), 2)
+	# cv2.rectangle(orig, (startX, startY), (endX, endY), (0, 255, 0), 2)
+if len(boundBoxes) > 0 :		
+	boundBoxes = np.asarray(boundBoxes)
+	left = np.min(boundBoxes[:,0])
+	top = np.min(boundBoxes[:,1])
+	right = np.max(boundBoxes[:,2])
+	bottom = np.max(boundBoxes[:,3])
+	cv2.rectangle(orig, (left,top), (right,bottom), (255, 0, 0), 2)
 
 # show the output image
 cv2.imshow("Text Detection", orig)
