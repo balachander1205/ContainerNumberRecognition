@@ -158,7 +158,7 @@ while True:
 		endX = int(endX * rW)
 		endY = int(endY * rH)
 
-		boundBoxes.append([startX+10, startY+10, endX+10, endY+10])
+		boundBoxes.append([startX-20, startY-20, endX+10, endY+10])
 		# draw the bounding box on the frame
 		# cv2.rectangle(orig, (startX+5, startY+5), (endX+5, endY+5), (0, 255, 255), 1)
 
@@ -168,7 +168,7 @@ while True:
 		top = np.min(boundBoxes[:,1])
 		right = np.max(boundBoxes[:,2])
 		bottom = np.max(boundBoxes[:,3])
-		cv2.rectangle(orig, (left,top), (right,bottom), (255, 0, 0), 2)
+		cv2.rectangle(orig, (left,top), (right,bottom), (0, 255, 0), 2)
 
 
 	# update the FPS counter
