@@ -1,6 +1,5 @@
 # USAGE
 # python text_detection_video.py --east frozen_east_text_detection.pb
-
 # import the necessary packages
 from imutils.video import VideoStream
 from imutils.video import FPS
@@ -9,12 +8,10 @@ import numpy as np
 import argparse
 import imutils
 import time
+import uuid
 import cv2
-
-def bounding_box(points):
-	x_coordinates, y_coordinates = zip(*points)
-	return [(min(x_coordinates), min(y_coordinates)), (max(x_coordinates), max(y_coordinates))]
-
+# from centroidtracker import CentroidTracker
+# ct = CentroidTracker()
 
 def decode_predictions(scores, geometry):
 	# grab the number of rows and columns from the scores volume, then
@@ -161,20 +158,30 @@ while True:
 		boundBoxes.append([startX-20, startY-20, endX+10, endY+10])
 		# draw the bounding box on the frame
 		# cv2.rectangle(orig, (startX+5, startY+5), (endX+5, endY+5), (0, 255, 255), 1)
-
+	num_plate = 0
 	if len(boundBoxes) > 0 :		
 		boundBoxes = np.asarray(boundBoxes)
 		left = np.min(boundBoxes[:,0])
 		top = np.min(boundBoxes[:,1])
 		right = np.max(boundBoxes[:,2])
 		bottom = np.max(boundBoxes[:,3])
+		# Finding center of rectangle.	
+		cX = int((left+right)/2)
+		cY = int((top+bottom)/2)
+		centeroid = (cX, cY)
+		num_plate = orig[top:bottom, left:right]
+		numplateimgname = str(uuid.uuid4())
+		cv2.imwrite("numbers/"+numplateimgname+".png",num_plate)
+		cv2.circle(orig, centeroid, 7, (0,255,0), -1)
 		cv2.rectangle(orig, (left,top), (right,bottom), (0, 255, 0), 2)
-
-
-	# update the FPS counter
-	fps.update()
+		
+		# cv2.imshow("Container Number Detection", num_plate)
+		
+	# update the FPS counter	
+	# fps.update()
 
 	# show the output frame
+
 	cv2.imshow("Container Number Detection", orig)
 	key = cv2.waitKey(1) & 0xFF
 
@@ -183,17 +190,17 @@ while True:
 		break
 
 # stop the timer and display FPS information
-fps.stop()
-print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
-print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+# fps.stop()
+# print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
+# print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 # if we are using a webcam, release the pointer
-if not args.get("video", False):
-	vs.stop()
+# if not args.get("video", False):
+	# vs.stop()
 
 # otherwise, release the file pointer
-else:
-	vs.release()
+# else:
+	# vs.release()
 
 # close all windows
 cv2.destroyAllWindows()
